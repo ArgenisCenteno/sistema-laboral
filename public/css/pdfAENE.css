@@ -1,0 +1,124 @@
+*{
+    padding: 0;
+    margin: 0;
+    /* padding-left: 40px; */
+    /* margin-left: 10px; */
+}
+
+body{
+    background-image: url("iconos/fondoAEN.png");
+    background-size: 104% 100%;
+    background-position:center center;
+    background-repeat:no-repeat;
+    background-attachment: fixed; 
+    /* padding-left: 20px; */
+    /* margin-left: 20px; */
+    
+}
+
+header {
+    
+    position: relative;
+    text-align: center;
+    height: 100px; /* Altura ajustable según tu diseño */
+    margin-top: 20px;
+    margin-bottom: 4px;
+}
+
+.header-left, 
+.header-right {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.header-left {
+    left: 0;
+    margin-left: 50px;
+}
+
+.header-right {
+    right: 0;
+    margin-right: 50px;
+}
+
+.header-center {
+    display: inline-block;
+    vertical-align: middle;
+    margin-top: 35px;
+    width: 60%;
+    text-align: center;
+}
+
+.fondo-titulo{
+    /* font-size: 0.2rem; */
+    background-color: rgb(200, 200, 200);
+    padding-top: 3px;
+    padding-bottom: 3px;
+    /* font-weight:bold; */
+    
+}
+
+.fondo-titulo h1{
+    font-size: 1.3rem;
+
+}
+
+.content-doc{
+    /* overflow:hidden; */
+    /* background-color: violet; */
+}
+
+.razon-social{
+    background-color: rgb(200, 200, 200);
+    border-radius: 25px;
+
+}
+
+.licenciaN{
+    color: white;
+    font-weight: bold;
+    border-radius: 25px;
+    background-color: rgb(255, 62, 62);
+}
+.licenciaE{
+    color: white;
+    font-weight: bold;
+    border-radius: 25px;
+    background-color: #1f3b73;
+}
+
+
+table > thead{
+    background-color: rgb(200, 200, 200);
+    /* font-weight: bold ; */
+    font-size: 12px !important;
+}
+
+
+
+.content-firma {
+    display: flex;
+    justify-content: center;
+}
+
+.firma-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+}
+
+.qr-derecha {
+    position: absolute;
+    right: 0;
+}
+
+p{
+    font-size: 13px;
+    /* margin-bottom: 0;
+    margin-top: 0;
+    padding-top: 0;
+    padding-bottom: 0; */
+}
+

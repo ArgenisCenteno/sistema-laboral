@@ -60,7 +60,7 @@
         <div class="card-footer text-end">
                         <a href="{{ route('asistencias.index') }}" class="btn btn-danger">Cancelar</a>
 
-            <button type="submit" class="btn btn-primary">Guardar</button>
+            <button type="submit" id="btn-submit"  class="btn btn-primary">Guardar</button>
         </div>
     </div>
 </form>

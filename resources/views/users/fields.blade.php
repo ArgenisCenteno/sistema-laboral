@@ -4,33 +4,36 @@
     <div class="row">
         <div class="form-group mb-3 col-md-6">
             <label for="name">Nombre de usuario</label>
-            <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
+            <input id="name" type="text" name="name" class="form-control @error('name') is-invalid @enderror"
                 value="{{ old('name') }}" required>
+                <div class="invalid-feedback"></div>
             @error('name')
-                <span class="invalid-feedback">{{ $message }}</span>
+                <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
 
         <div class="form-group mb-3 col-md-6">
             <label for="email">Correo electrónico</label>
-            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
+            <input id="email" type="email" name="email" class="form-control @error('email') is-invalid @enderror"
                 value="{{ old('email') }}" required>
+                  <div class="invalid-feedback"></div>
             @error('email')
-                <span class="invalid-feedback">{{ $message }}</span>
+                <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
 
         <div class="form-group mb-3 col-md-6">
             <label for="password">Contraseña</label>
-            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required>
+            <input id="password" type="password" name="password" class="form-control @error('password') is-invalid @enderror" required>
+           <div class="invalid-feedback"></div>
             @error('password')
-                <span class="invalid-feedback">{{ $message }}</span>
+                <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
 
         <div class="form-group mb-3 col-md-6 d-flex align-items-end">
             <div class="form-check form-switch ml-5">
-                <input type="checkbox" class="form-check-input" id="es_personal" name="es_personal" {{ old('es_personal') ? 'checked' : '' }}>
+                <input id="es_personal" type="checkbox" class="form-check-input" name="es_personal" {{ old('es_personal') ? 'checked' : '' }}>
                 <label class="form-check-label" for="es_personal">¿También es personal?</label>
             </div>
         </div>
@@ -41,32 +44,52 @@
         <div class="row">
             <div class="form-group mb-3 col-md-6">
                 <label for="nombre">Nombre</label>
-                <input type="text" name="nombre" class="form-control" value="{{ old('nombre') }}">
+                <input id="nombre" type="text" name="nombre" class="form-control @error('nombre') is-invalid @enderror" value="{{ old('nombre') }}">
+                <div class="invalid-feedback"></div>
+                @error('nombre')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
             </div>
 
             <div class="form-group mb-3 col-md-6">
                 <label for="apellido">Apellido</label>
-                <input type="text" name="apellido" class="form-control" value="{{ old('apellido') }}">
+                <input id="apellido" type="text" name="apellido" class="form-control @error('apellido') is-invalid @enderror" value="{{ old('apellido') }}">
+                <div class="invalid-feedback"></div>
+                @error('apellido')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
             </div>
 
             <div class="form-group mb-3 col-md-6">
                 <label for="cedula">Cédula</label>
-                <input type="text" name="cedula" class="form-control" value="{{ old('cedula') }}">
+                <input id="cedula" type="text" name="cedula" class="form-control @error('cedula') is-invalid @enderror" value="{{ old('cedula') }}">
+                <div class="invalid-feedback"></div>
+                @error('cedula')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
             </div>
 
             <div class="form-group mb-3 col-md-6">
                 <label for="rif">RIF</label>
-                <input type="text" name="rif" class="form-control" value="{{ old('rif') }}">
+                <input id="rif" type="text" name="rif" class="form-control @error('rif') is-invalid @enderror" value="{{ old('rif') }}">
+                <div class="invalid-feedback"></div>
+                @error('rif')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
             </div>
 
             <div class="form-group mb-3 col-md-6">
                 <label for="telefono">Teléfono</label>
-                <input type="text" name="telefono" class="form-control" value="{{ old('telefono') }}">
+                <input id="telefono" type="text" name="telefono" class="form-control @error('telefono') is-invalid @enderror" value="{{ old('telefono') }}">
+                <div class="invalid-feedback"></div>
+                @error('telefono')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
             </div>
 
             <div class="form-group mb-3 col-md-6">
                 <label for="departamento_id">Departamento</label>
-                <select name="departamento_id" class="form-control">
+                <select id="departamento_id" name="departamento_id" class="form-control @error('departamento_id') is-invalid @enderror">
                     <option value="">Seleccione un departamento</option>
                     @foreach($departamentos as $departamento)
                         <option value="{{ $departamento->id }}" {{ old('departamento_id') == $departamento->id ? 'selected' : '' }}>
@@ -74,18 +97,26 @@
                         </option>
                     @endforeach
                 </select>
+                <div class="invalid-feedback"></div>
+                @error('departamento_id')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
             </div>
 
             <div class="form-group mb-3 col-12">
                 <label for="direccion">Dirección</label>
-                <textarea name="direccion" class="form-control">{{ old('direccion') }}</textarea>
+                <textarea id="direccion" name="direccion" class="form-control @error('direccion') is-invalid @enderror">{{ old('direccion') }}</textarea>
+              <div class="invalid-feedback"></div>
+                @error('direccion')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
             </div>
         </div>
     </div>
 
     <div class="mt-4">
         <a href="{{ route('users.index') }}" class="btn btn-danger">Cancelar</a>
-        <button type="submit" class="btn btn-primary">Registrar</button>
+        <button type="submit" id="btn-submit" class="btn btn-primary">Registrar</button>
     </div>
 </form>
 

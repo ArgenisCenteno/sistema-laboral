@@ -29,6 +29,6 @@
 
     <div class="mt-4">
         <a href="{{ route('users.index') }}" class="btn btn-secondary">Cancelar</a>
-        <button type="submit" class="btn btn-primary">Actualizar</button>
+        <button type="submit" id="btn-submit" class="btn btn-primary">Actualizar</button>
     </div>
 </form>

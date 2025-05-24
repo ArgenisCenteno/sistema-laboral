@@ -45,7 +45,7 @@
                             </div>
 
                             <div>
-                                <button type="submit" class="btn btn-primary mb-1">Consultar</button>
+                                <button type="submit" id="btn-submit" class="btn btn-primary mb-1">Consultar</button>
                             </div>
                         </form>
 

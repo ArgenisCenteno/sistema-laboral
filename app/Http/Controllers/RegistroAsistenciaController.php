@@ -58,17 +58,24 @@ class RegistroAsistenciaController extends Controller
 public function registrarAsistencia(Request $request)
 {
     $request->validate([
-        'qr_code' => 'required|string',
+       // 'qr_code' => 'required|string',
         'tipo' => 'required|in:entrada,salida',
     ]);
 
-    $personal = Personal::where('qr_code', $request->qr_code)->first();
+    // Buscar personal por qr_code o cédula
+    $personal = Personal::where('qr_code', $request->qr_code)
+                ->orWhere('cedula', $request->qr_code)
+                ->first();
 
     if (!$personal) {
-        return response()->json(['message' => 'QR no válido o personal no encontrado', 'success' => false], 404);
+        return response()->json([
+            'message' => 'Código QR o cédula no válida o personal no encontrado',
+            'success' => false
+        ], 404);
     }
 
     $fechaHoy = now()->toDateString();
+
     $registro = RegistroAsistencia::firstOrNew([
         'personal_id' => $personal->id,
         'fecha' => $fechaHoy,
@@ -76,63 +83,52 @@ public function registrarAsistencia(Request $request)
 
     if ($request->tipo === 'entrada') {
         if ($registro->hora_entrada) {
-            return response()->json(['message' => 'Ya registraste tu entrada hoy.', 'success' => false], 200);
+            return response()->json([
+                'message' => 'Ya se registró la entrada para hoy',
+                'success' => false,
+                'personal' => $personal
+            ]);
         }
+        $registro->hora_entrada = now();
+        $registro->save();
 
-        $horaActual = now();
-        $registro->hora_entrada = $horaActual;
-
-        // 🕒 Obtener horario laboral del personal
-        $horario = $personal->horariosLaborales()->first(); // Puedes mejorar esto con lógica por día
-
-        if ($horario) {
-            $horaEntradaProgramada = Carbon::createFromFormat('H:i:s', $horario->hora_entrada)->setDateFrom($horaActual);
-
-            if ($horaActual->gt($horaEntradaProgramada)) {
-                $minutosTarde = $horaEntradaProgramada->diffInMinutes($horaActual);
-                $registro->minutos_tarde = $minutosTarde;
-                $registro->horas_tarde = round($minutosTarde / 60, 2);
-                $registro->observacion = 'Llegó tarde';
-            } else {
-                $registro->observacion = 'Llegó a tiempo';
-            }
+        return response()->json([
+            'message' => 'Entrada registrada correctamente',
+            'success' => true,
+            'personal' => $personal
+        ]);
+    } elseif ($request->tipo === 'salida') {
+        if (!$registro->hora_entrada) {
+            return response()->json([
+                'message' => 'No hay registro de entrada para registrar salida',
+                'success' => false,
+                'personal' => $personal
+            ]);
         }
-
-    } else {
         if ($registro->hora_salida) {
-            return response()->json(['message' => 'Ya registraste tu salida hoy.', 'success' => false], 200);
+            return response()->json([
+                'message' => 'Ya se registró la salida para hoy',
+                'success' => false,
+                'personal' => $personal
+            ]);
         }
+        $registro->hora_salida = now();
+        $registro->save();
 
-        $horaActual = now();
-        $registro->hora_salida = $horaActual;
-
-        if ($registro->hora_entrada) {
-            $horas = $registro->hora_entrada->diffInMinutes($horaActual) / 60;
-            $registro->horas_trabajadas = round($horas, 2);
-        }
-
-        // Calcular horas extras si salió después de la hora de salida programada
-        $horario = $personal->horariosLaborales()->first();
-
-        if ($horario) {
-            $horaSalidaProgramada = Carbon::createFromFormat('H:i:s', $horario->hora_salida)->setDateFrom($horaActual);
-
-            if ($horaActual->gt($horaSalidaProgramada)) {
-                $minutosExtras = $horaSalidaProgramada->diffInMinutes($horaActual);
-                $registro->horas_extras = round($minutosExtras / 60, 2);
-                $registro->observacion = trim(($registro->observacion ?? '') . ' + Horas extras');
-            }
-        }
+        return response()->json([
+            'message' => 'Salida registrada correctamente',
+            'success' => true,
+            'personal' => $personal
+        ]);
     }
 
-    $registro->save();
-
     return response()->json([
-        'message' => ucfirst($request->tipo) . ' registrada correctamente.',
-        'personal' => $personal,
-        'success' => true
-    ], 200);
+        'message' => 'Tipo de registro inválido',
+        'success' => false,
+        'personal' => $personal
+    ], 400);
 }
+
 
 
     public function personalDatos(Request $request)

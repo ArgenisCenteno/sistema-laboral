@@ -28,6 +28,9 @@ class RegistroAsistenciaController extends Controller
                 ->addColumn('cedula', function ($row) {
                     return $row->personal->cedula ?? 'S/D';
                 })
+                ->addColumn('motivo_salida_anticipada', function ($row) {
+                    return $row->motivo_salida_anticipada ?? 'S/D';
+                })
                 ->addColumn('fecha', function ($row) {
                     return $row->fecha->format('d-m-Y');
                 })
@@ -54,80 +57,83 @@ class RegistroAsistenciaController extends Controller
         }
     }
 
-
-public function registrarAsistencia(Request $request)
-{
-    $request->validate([
-       // 'qr_code' => 'required|string',
-        'tipo' => 'required|in:entrada,salida',
-    ]);
-
-    // Buscar personal por qr_code o cédula
-    $personal = Personal::where('qr_code', $request->qr_code)
-                ->orWhere('cedula', $request->qr_code)
-                ->first();
-
-    if (!$personal) {
-        return response()->json([
-            'message' => 'Código QR o cédula no válida o personal no encontrado',
-            'success' => false
-        ], 404);
+    public function create()
+    {
+        return view('asistencias.create');
     }
 
-    $fechaHoy = now()->toDateString();
-
-    $registro = RegistroAsistencia::firstOrNew([
-        'personal_id' => $personal->id,
-        'fecha' => $fechaHoy,
-    ]);
-
-    if ($request->tipo === 'entrada') {
-        if ($registro->hora_entrada) {
-            return response()->json([
-                'message' => 'Ya se registró la entrada para hoy',
-                'success' => false,
-                'personal' => $personal
-            ]);
-        }
-        $registro->hora_entrada = now();
-        $registro->save();
-
-        return response()->json([
-            'message' => 'Entrada registrada correctamente',
-            'success' => true,
-            'personal' => $personal
+    public function registrarAsistencia(Request $request)
+    {
+        $request->validate([
+            'qr_code' => 'required|string',
+            'motivo' => 'nullable|string|max:255',
         ]);
-    } elseif ($request->tipo === 'salida') {
+
+        $personal = Personal::where('qr_code', $request->qr_code)
+            ->orWhere('cedula', $request->qr_code)
+            ->first();
+
+        if (!$personal) {
+            return response()->json([
+                'message' => 'Código QR o cédula no válida o personal no encontrado',
+                'success' => false
+            ], 404);
+        }
+
+        $fechaHoy = now()->toDateString();
+        $horaActual = now();
+        $horaLimite = now()->setTime(16, 0, 0); // 4:00 PM
+
+        $registro = RegistroAsistencia::firstOrNew([
+            'personal_id' => $personal->id,
+            'fecha' => $fechaHoy,
+        ]);
+
+        // Si no tiene entrada → registrar entrada
         if (!$registro->hora_entrada) {
-            return response()->json([
-                'message' => 'No hay registro de entrada para registrar salida',
-                'success' => false,
-                'personal' => $personal
-            ]);
-        }
-        if ($registro->hora_salida) {
-            return response()->json([
-                'message' => 'Ya se registró la salida para hoy',
-                'success' => false,
-                'personal' => $personal
-            ]);
-        }
-        $registro->hora_salida = now();
-        $registro->save();
+            $registro->hora_entrada = $horaActual;
+            $registro->save();
 
+            return response()->json([
+                'message' => 'Entrada registrada correctamente',
+                'success' => true,
+                'tipo' => 'entrada',
+                'personal' => $personal
+            ]);
+        }
+
+        // Ya tiene entrada pero no salida
+        if (!$registro->hora_salida) {
+            // Si es antes de la hora límite, se requiere motivo
+            if ($horaActual->lt($horaLimite) && !$request->motivo) {
+                return response()->json([
+                    'message' => 'Se requiere motivo para salida anticipada',
+                    'success' => false,
+                    'tipo' => 'motivo',
+                    'personal' => $personal
+                ]);
+            }
+
+            $registro->hora_salida = $horaActual;
+            $registro->motivo_salida_anticipada = $request->motivo ?? null;
+            $registro->save();
+
+            return response()->json([
+                'message' => 'Salida registrada correctamente',
+                'success' => true,
+                'tipo' => 'salida',
+                'personal' => $personal
+            ]);
+        }
+
+        // Ya tiene entrada y salida
         return response()->json([
-            'message' => 'Salida registrada correctamente',
-            'success' => true,
+            'message' => 'Ya se registró entrada y salida para hoy',
+            'success' => false,
+            'tipo' => 'completo',
             'personal' => $personal
         ]);
     }
-
-    return response()->json([
-        'message' => 'Tipo de registro inválido',
-        'success' => false,
-        'personal' => $personal
-    ], 400);
-}
 
 
 

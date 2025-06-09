@@ -3,12 +3,12 @@
         <thead class="bg-light">
             <tr>
                 <th>Personal</th>
-                 <th>Cédula</th>
+                <th>Cédula</th>
                 <th>Fecha</th>
                 <th>Hora Entrada</th>
                 <th>Hora Salida</th>
-                <th>Horas Trabajadas</th> 
-                <th>Acciones</th>
+                <th>Horas Trabajadas</th>
+                <th>Salida Anticipada</th>
             </tr>
         </thead>
         <tbody></tbody>
@@ -29,15 +29,16 @@
             dataType: 'json',
             type: "POST",
 
-             columns: [
+            columns: [
                 { data: 'personal', name: 'personal' },
-                  { data: 'cedula', name: 'cedula' },
+                { data: 'cedula', name: 'cedula' },
                 { data: 'fecha', name: 'fecha' },
-                
+
                 { data: 'hora_entrada', name: 'hora_entrada' },
                 { data: 'hora_salida', name: 'hora_salida' },
-                { data: 'horas_trabajadas', name: 'horas_trabajadas' }, 
-                { data: 'actions', name: 'actions', orderable: false, searchable: false }
+                { data: 'horas_trabajadas', name: 'horas_trabajadas' },
+                { data: 'motivo_salida_anticipada', name: 'motivo_salida_anticipada' },
+
             ],
 
             order: [[0, 'desc']],

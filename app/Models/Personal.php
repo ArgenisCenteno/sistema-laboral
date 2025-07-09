@@ -43,5 +43,6 @@ class Personal extends Model
         return $this->hasMany(Inasistencia::class, 'personal_id');
     }
 
+ 
 
 }

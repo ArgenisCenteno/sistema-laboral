@@ -80,18 +80,43 @@ class RegistroAsistenciaController extends Controller
             ], 404);
         }
 
-        $fechaHoy = now()->toDateString();
         $horaActual = now();
-        $horaLimite = now()->setTime(16, 0, 0); // 4:00 PM
+        $fechaHoy = $horaActual->toDateString();
 
+        // Buscar horario laboral vigente del personal
+        $horarioAsignado = $personal->horariosLaborales()->first();
+        
+        if (!$horarioAsignado) {
+            return response()->json([
+                'message' => 'No tiene un horario laboral asignado',
+                'success' => false
+            ], 400);
+        }
+
+        // Definir hora límite de entrada y salida según el horario asignado
+        $horaLimiteEntrada = now()->copy()->setTimeFromTimeString($horarioAsignado->hora_entrada);
+        $horaLimiteSalida = now()->copy()->setTimeFromTimeString($horarioAsignado->hora_salida);
+
+        // Buscar o crear el registro de asistencia para hoy
         $registro = RegistroAsistencia::firstOrNew([
             'personal_id' => $personal->id,
             'fecha' => $fechaHoy,
         ]);
 
-        // Si no tiene entrada → registrar entrada
+        // Registrar ENTRADA
         if (!$registro->hora_entrada) {
+
+            if ($horaActual->gt($horaLimiteEntrada) && !$request->motivo) {
+                return response()->json([
+                    'message' => 'Se requiere motivo por llegada tarde',
+                    'success' => false,
+                    'tipo' => 'motivo_llegada',
+                    'personal' => $personal
+                ]);
+            }
+
             $registro->hora_entrada = $horaActual;
+            $registro->motivo_llegada_tarde = $request->motivo ?? null;
             $registro->save();
 
             return response()->json([
@@ -102,14 +127,14 @@ class RegistroAsistenciaController extends Controller
             ]);
         }
 
-        // Ya tiene entrada pero no salida
+        // Registrar SALIDA
         if (!$registro->hora_salida) {
-            // Si es antes de la hora límite, se requiere motivo
-            if ($horaActual->lt($horaLimite) && !$request->motivo) {
+
+            if ($horaActual->lt($horaLimiteSalida) && !$request->motivo) {
                 return response()->json([
                     'message' => 'Se requiere motivo para salida anticipada',
                     'success' => false,
-                    'tipo' => 'motivo',
+                    'tipo' => 'motivo_salida',
                     'personal' => $personal
                 ]);
             }
@@ -126,7 +151,7 @@ class RegistroAsistenciaController extends Controller
             ]);
         }
 
-        // Ya tiene entrada y salida
+        // Si ya tiene entrada y salida
         return response()->json([
             'message' => 'Ya se registró entrada y salida para hoy',
             'success' => false,
@@ -134,7 +159,6 @@ class RegistroAsistenciaController extends Controller
             'personal' => $personal
         ]);
     }
-
 
 
     public function personalDatos(Request $request)

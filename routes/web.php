@@ -50,6 +50,7 @@ Route::get('/exportar-asistencias', [RegistroAsistenciaController::class, 'expor
 Route::get('/asistencias/mensuales/exportar', [App\Http\Controllers\RegistroAsistenciaController::class, 'exportarMensual'])->name('asistencias.exportar.mensual');
 Route::get('/exportar-inasistencias', [InasistenciaController::class, 'exportar'])->name('inasistencias.exportar');
 Route::get('/inasistencias/mensuales/exportar', [App\Http\Controllers\InasistenciaController::class, 'exportarMensual'])->name('inasistencias.exportar.mensual');
+Route::post('/inasistencias/registrar-ausentes', [InasistenciaController::class, 'registrarAusentes'])->name('inasistencias.registrarAusentes');
 
 
  

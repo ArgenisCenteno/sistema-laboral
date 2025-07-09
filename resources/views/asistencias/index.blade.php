@@ -13,7 +13,9 @@
                             <a href="{{ route('asistencias.exportar.mensual') }}" class="btn btn-success">
                                 Reporte General Mensual
                             </a>
-
+  <a href="{{ route('asistencias.create') }}" class="btn btn-primary">
+                              Registrar
+                            </a>
                         </ol>
                     </div>
                     <div class="col-sm-12 d-flex justify-content-end mt-3">
@@ -46,6 +48,7 @@
 
                             <div>
                                 <button type="submit" id="btn-submit" class="btn btn-primary mb-1">Consultar</button>
+                           
                             </div>
                         </form>
 

@@ -32,6 +32,12 @@
 <div id="resultado-positivo" class="mt-3 text-success fw-bold"></div>
 <div id="resultado-negativo" class="mt-3 text-danger fw-bold"></div>
 <div id="personal" class="mt-3 text-black fw-bold"></div>
+<!-- Formulario para motivo -->
+<div id="seccion-motivo" style="display:none;" class="mt-4">
+    <label for="motivo-input" class="form-label fw-semibold " id="motivo-label">Ingrese el motivo:</label>
+    <textarea id="motivo-input" class="form-control" rows="3" placeholder="Escriba el motivo..."></textarea>
+    <button id="btn-enviar-motivo" class="btn btn-success mt-2">Enviar Motivo</button>
+</div>
 
 <script>
     const beep = new Audio('/sounds/beep.mp3');
@@ -100,37 +106,37 @@
     });
 
     // Escanear QR automáticamente
- function iniciarCamara() {
-    escaneado = false;
-    escaneando = true;
+    function iniciarCamara() {
+        escaneado = false;
+        escaneando = true;
 
-    html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: 250 },
-        (decodedText) => {
-            if (escaneado) return;
-            escaneado = true;
-            registrarAsistenciaAuto(decodedText);
-        },
-        () => {}
-    ).catch(err => {
-        console.error("No se pudo iniciar la cámara", err);
-        escaneando = false;
-    });
-}
-
-function detenerCamara() {
-    if (!escaneando) return;
-
-    html5QrCode.stop()
-        .then(() => {
+        html5QrCode.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: 250 },
+            (decodedText) => {
+                if (escaneado) return;
+                escaneado = true;
+                registrarAsistenciaAuto(decodedText);
+            },
+            () => { }
+        ).catch(err => {
+            console.error("No se pudo iniciar la cámara", err);
             escaneando = false;
-            seccionQr.style.display = 'none';
-        })
-        .catch((err) => {
-            console.warn("No se pudo detener la cámara (probablemente no estaba activa):", err);
         });
-}
+    }
+
+    function detenerCamara() {
+        if (!escaneando) return;
+
+        html5QrCode.stop()
+            .then(() => {
+                escaneando = false;
+                seccionQr.style.display = 'none';
+            })
+            .catch((err) => {
+                console.warn("No se pudo detener la cámara (probablemente no estaba activa):", err);
+            });
+    }
 
     function limpiarResultados() {
         document.getElementById('resultado-positivo').innerText = '';
@@ -144,9 +150,13 @@ function detenerCamara() {
     }
 
     // Registro automático
-    function registrarAsistenciaAuto(codigo) {
+    let motivoPendiente = null;
+    let codigoPendiente = null;
+
+    function registrarAsistenciaAuto(codigo, motivo = null) {
         beep.play();
         limpiarResultados();
+        document.getElementById('seccion-motivo').style.display = 'none'; // Ocultar el formulario de motivo si estaba visible
 
         fetch("{{ route('registro.asistencia') }}", {
             method: "POST",
@@ -154,46 +164,50 @@ function detenerCamara() {
                 "Content-Type": "application/json",
                 "X-CSRF-TOKEN": "{{ csrf_token() }}"
             },
-            body: JSON.stringify({ qr_code: codigo })
+            body: JSON.stringify({ qr_code: codigo, motivo: motivo })
         })
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
                     document.getElementById('resultado-positivo').innerText = data.message;
+                    detenerCamara();
                 } else {
-                    if (data.tipo === 'motivo') {
-                        const motivo = prompt("Salida antes de la hora permitida. Indica el motivo:");
-                        if (motivo) {
-                            fetch("{{ route('registro.asistencia') }}", {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                                },
-                                body: JSON.stringify({ qr_code: codigo, motivo: motivo })
-                            })
-                                .then(res => res.json())
-                                .then(data2 => {
-                                    if (data2.success) {
-                                        document.getElementById('resultado-positivo').innerText = data2.message;
-                                    } else {
-                                        document.getElementById('resultado-negativo').innerText = data2.message;
-                                    }
-                                    if (data2.personal) mostrarPersonal(data2.personal);
-                                });
-                        }
+                    if (data.tipo === 'motivo_salida' || data.tipo === 'motivo_llegada') {
+                        motivoPendiente = data.tipo;
+                        codigoPendiente = codigo;
+const label = document.getElementById('motivo-label');
+    if (data.tipo === 'motivo_salida') {
+        label.innerText = 'Indique el motivo por salir antes de la hora permitida:';
+    } else if (data.tipo === 'motivo_llegada') {
+        label.innerText = 'Indique el motivo por llegar tarde:';
+    }
+                        document.getElementById('seccion-motivo').style.display = 'block';
                     } else {
                         document.getElementById('resultado-negativo').innerText = data.message;
+                        detenerCamara();
                     }
                 }
 
                 if (data.personal) mostrarPersonal(data.personal);
-                detenerCamara();
             })
             .catch(error => {
                 console.error('Error:', error);
             });
     }
+    document.getElementById('btn-enviar-motivo').addEventListener('click', () => {
+        const motivo = document.getElementById('motivo-input').value.trim();
+
+        if (!motivo) {
+            alert('Por favor, ingresa un motivo.');
+            return;
+        }
+
+        document.getElementById('seccion-motivo').style.display = 'none';
+        document.getElementById('motivo-input').value = '';
+
+        registrarAsistenciaAuto(codigoPendiente, motivo);
+    });
+
 </script>
 <script>
     const cedulaInput = document.getElementById('cedula-input');

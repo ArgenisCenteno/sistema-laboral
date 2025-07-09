@@ -8,15 +8,28 @@
                     <div class="col-sm-6">
                         <h3 class="mb-0">Inasistencias</h3>
                     </div>
-                    <div class="col-sm-6">
-                        <ol class="breadcrumb float-sm-end">
-                            <a href="{{ route('inasistencias.exportar.mensual') }}" class="btn btn-success">
-                                Reporte General Mensual
-                            </a>
+                   <div class="col-sm-6">
+    <div class="d-flex justify-content-end align-items-center gap-2">
+        <a href="{{ route('inasistencias.exportar.mensual') }}" class="btn btn-success">
+            Reporte General Mensual
+        </a>
 
-                            <a href="{{ route('inasistencias.create') }}" class="btn btn-primary ml-3">Registrar</a>
-                        </ol>
-                    </div>
+        <a href="{{ route('inasistencias.create') }}" class="btn btn-primary">
+            Registrar
+        </a>
+
+        <form action="{{ route('inasistencias.registrarAusentes') }}" class="mt-2" method="POST"
+            onsubmit="return confirm('¿Estás seguro de registrar las inasistencias de hoy?');">
+            @csrf
+            <button type="submit" class="btn btn-danger">
+                Registrar ausentes hoy
+            </button>
+        </form>
+    </div>
+</div>
+
+
+
 
                     <div class="col-sm-12 d-flex justify-content-end mt-3">
 

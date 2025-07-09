@@ -21,7 +21,8 @@ class RegistroAsistencia extends Model
         'horas_extras',
         'horas_tarde',
         'minutos_tarde',
-        'motivo_salida_anticipada'
+        'motivo_salida_anticipada',
+        'motivo_llegada_tarde'
     ];
 
     protected $casts = [

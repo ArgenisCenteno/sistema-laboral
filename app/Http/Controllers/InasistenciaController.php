@@ -7,6 +7,8 @@ use App\Exports\RegistroAsistenciaExport;
 use App\Exports\RegistroInasistenciaExport;
 use App\Models\Inasistencia;
 use App\Models\Personal;
+use App\Models\RegistroAsistencia;
+use DB;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\DataTables;
@@ -96,4 +98,36 @@ class InasistenciaController extends Controller
     {
         return Excel::download(new InasistenciasMensualesExport, 'inasistencias_mensuales.xlsx');
     }
+
+    public function registrarAusentes(Request $request)
+{
+    $fechaHoy = now()->toDateString();
+
+    // IDs del personal que sí asistieron hoy
+    $asistentesHoy = RegistroAsistencia::where('fecha', $fechaHoy)->pluck('personal_id')->toArray();
+
+    // Personal que no ha registrado asistencia hoy
+    $personalesAusentes = Personal::whereNotIn('id', $asistentesHoy)->get();
+
+    // Registrar inasistencias
+    DB::beginTransaction();
+    try {
+        foreach ($personalesAusentes as $personal) {
+            Inasistencia::create([
+                'personal_id' => $personal->id,
+                'fecha' => $fechaHoy,
+                'motivo' => 'No asistió',
+            ]);
+        }
+
+        DB::commit();
+
+        Alert::success('¡Éxito!', 'Inasistencias registradas correctamente.')->showConfirmButton('Aceptar', 'rgb(5, 68, 141)');
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Alert::error('Error', 'No se pudo registrar las inasistencias.')->showConfirmButton('Aceptar', 'rgb(5, 68, 141)');
+    }
+
+    return redirect()->route('inasistencias.index');
+}
 }

@@ -72,6 +72,24 @@
                 @error('departamento_id') {{ $message }} @enderror
             </div>
         </div>
+
+         <div class="col-md-6 mb-3">
+            <label for="horario_laboral_id">Horario laboral</label>
+            <select name="horario_laboral_id" id="horario_laboral_id"
+                class="form-control @error('horario_laboral_id') is-invalid @enderror">
+                <option value="">Seleccione...</option>
+                @foreach ($horarios as $horario)
+                    <option value="{{ $horario->id }}"
+                        {{ old('horario_laboral_id', $personal->horariosLaborales->last()?->id) == $horario->id ? 'selected' : '' }}>
+                        {{ $horario->nombre }} ({{ $horario->hora_entrada }} - {{ $horario->hora_salida }})
+                    </option>
+                @endforeach
+            </select>
+            <div class="invalid-feedback">
+                @error('horario_laboral_id'){{ $message }}@enderror
+                @if (! $errors->has('horario_laboral_id'))Este campo es obligatorio.@endif
+            </div>
+        </div>
     </div>
 
     <div class="btn-list d-flex justify-content-end">

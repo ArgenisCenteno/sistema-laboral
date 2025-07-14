@@ -30,8 +30,9 @@ class PersonalController extends Controller
 
     public function create()
     {
+           $horarios = HorarioLaboral::all();
         $departamentos = Departamento::where('estado', 1)->get();
-        return view('personal.create', compact('departamentos'));
+        return view('personal.create', compact('departamentos', 'horarios'));
     }
 
     public function store(Request $request)
@@ -54,7 +55,10 @@ class PersonalController extends Controller
             ...$request->except('qr_code'),
             'qr_code' => $qrCode,
         ]);
-
+        if ($request->filled('horario_laboral_id')) {
+            // Desvincula horarios anteriores si deseas uno único
+            $personal->horariosLaborales()->sync([$request->horario_laboral_id]);
+        }
         Alert::success('¡Éxito!', 'Personal registrado correctamente.')->showConfirmButton('Aceptar', 'rgb(5, 68, 141)');
         return redirect()->route('personal.index');
     }

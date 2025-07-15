@@ -80,7 +80,7 @@
                 <option value="">Seleccione...</option>
                 @foreach ($horarios as $horario)
                     <option value="{{ $horario->id }}"
-                        {{ old('horario_laboral_id', $personal->horariosLaborales->last()?->id) == $horario->id ? 'selected' : '' }}>
+                      >
                         {{ $horario->nombre }} ({{ $horario->hora_entrada }} - {{ $horario->hora_salida }})
                     </option>
                 @endforeach
